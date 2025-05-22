@@ -192,12 +192,12 @@ ${message}
 </html>
   `;
     const mailOptions = {
-        from: process.env.EMAIL_USER, // Use your email as the sender
-        replyTo: email, // Set the reply-to as the user's email
+        from: process.env.EMAIL_USER,
+        replyTo: email,
         to: process.env.TO_EMAIL,
         subject: `New Project Inquiry from ${name} - ${formattedProjectType}`,
-        text: textContent, // Plain text version as fallback
-        html: htmlContent, // HTML version for better display
+        text: textContent,
+        html: htmlContent,
     };
     await transporter.sendMail(mailOptions);
 };
