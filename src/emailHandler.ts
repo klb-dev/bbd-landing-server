@@ -213,7 +213,7 @@ ${message}
     text: textContent, 
     html: htmlContent, 
   };
-  
+
   try {
     await transporter.sendMail(mailOptions);
 
