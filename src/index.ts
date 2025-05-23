@@ -14,16 +14,19 @@ app.use(express.json());
 
 app.post('/api/contact', async (req, res) => {
   try {
-    console.log("Incoming contact/reply request:", req.body);
     const { name, email, phone, projectType, budget, timeframe, message, to, subject, body } = req.body;
-    
-    // Send email
-    if(to && subject && body) {
-      await sendEmail({to, subject, html: `<p>${body}</p>`});
+
+    const isAdminReply = !!(to && subject && body);
+    if(isAdminReply) {
+      await sendEmail(({to, subject, body}));
       return res.status(200).send('Reply sent');
     }
-    console.log("Handling Contact Form Submission...");
-    await sendEmail(req.body);
+
+    if(!name || !email || !message) {
+      return res.status(400).send("Missing required contact fields");
+    }
+    
+    await sendEmail({name, email, phone, projectType, budget, timeframe, message});
 
     // Store in Firestore
     await db.collection('messages').add({
