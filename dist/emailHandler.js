@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { db } from './firebaseAdmin.js';
 import dotenv from 'dotenv';
 dotenv.config();
 export const sendEmail = async ({ name, email, phone, projectType, budget, timeframe, message, }) => {
@@ -195,9 +196,27 @@ ${message}
         from: process.env.EMAIL_USER,
         replyTo: email,
         to: process.env.TO_EMAIL,
-        subject: `New Project Inquiry from ${name} - ${formattedProjectType}`,
+        subject: `New Project Inquiry from ${name} - ${projectType || 'Not specified'}`,
         text: textContent,
         html: htmlContent,
     };
-    await transporter.sendMail(mailOptions);
+    try {
+        await transporter.sendMail(mailOptions);
+        // Log to Firestore after successful email
+        await db.collection('messages').add({
+            name,
+            email,
+            phone,
+            projectType,
+            budget,
+            timeframe,
+            message,
+            createdAt: new Date(),
+            status: 'new',
+        });
+    }
+    catch (err) {
+        console.error('Error sending email or writing to Firestore:', err);
+        throw err;
+    }
 };
