@@ -9,10 +9,11 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 app.post('/api/contact', async (req, res) => {
+    console.log("🔥 Incoming request:", req.body);
     try {
         const { name, email, phone, projectType, budget, timeframe, message, to, subject, body, isReply } = req.body;
         if (isReply && to && subject && body) {
-            console.log("🛠 Reply flow matched");
+            console.log("🛠 Reply flow matched", { to, subject, body });
             await sendEmail({ to, subject, body });
             return res.status(200).send("Reply sent");
         }
@@ -20,8 +21,9 @@ app.post('/api/contact', async (req, res) => {
             console.log("🚫 Missing fields:", { name, email, message });
             return res.status(400).send("Missing required contact fields");
         }
-        console.log("✅ Contact form flow matched");
+        console.log("📩 Routing to CONTACT FORM:", { name, email, message });
         await sendEmail({ name, email, phone, projectType, budget, timeframe, message });
+        console.log("✅ Email sent successfully");
         // Store in Firestore
         await db.collection('messages').add({
             name,
@@ -34,10 +36,11 @@ app.post('/api/contact', async (req, res) => {
             status: 'new',
             createdAt: FieldValue.serverTimestamp(),
         });
+        console.log("✅ Message saved to Firestore");
         res.status(200).send("Message saved and email sent");
     }
     catch (err) {
-        console.error("ERROR in /api/contact", err);
+        console.error("🔥 Error inside contact form logic:", err);
         res.status(500).send('Failed to process request');
     }
 });
