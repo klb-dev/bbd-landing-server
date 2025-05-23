@@ -10,15 +10,17 @@ app.use(cors());
 app.use(express.json());
 app.post('/api/contact', async (req, res) => {
     try {
-        const { name, email, phone, projectType, budget, timeframe, message, to, subject, body } = req.body;
-        const isAdminReply = !!(to && subject && body);
-        if (isAdminReply) {
-            await sendEmail(({ to, subject, body }));
-            return res.status(200).send('Reply sent');
+        const { name, email, phone, projectType, budget, timeframe, message, to, subject, body, isReply } = req.body;
+        if (isReply && to && subject && body) {
+            console.log("🛠 Reply flow matched");
+            await sendEmail({ to, subject, body });
+            return res.status(200).send("Reply sent");
         }
         if (!name || !email || !message) {
+            console.log("🚫 Missing fields:", { name, email, message });
             return res.status(400).send("Missing required contact fields");
         }
+        console.log("✅ Contact form flow matched");
         await sendEmail({ name, email, phone, projectType, budget, timeframe, message });
         // Store in Firestore
         await db.collection('messages').add({
