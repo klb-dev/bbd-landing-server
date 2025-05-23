@@ -212,7 +212,6 @@ export const sendEmail = async (data) => {
             text: textContent,
             html: htmlContent,
         };
-        return await transporter.sendMail(mailOptions);
         try {
             await transporter.sendMail(mailOptions);
             const data = {
@@ -236,5 +235,6 @@ export const sendEmail = async (data) => {
             console.error('Error sending email or writing to Firestore:', err);
             throw err;
         }
+        return await transporter.sendMail(mailOptions);
     }
 };
