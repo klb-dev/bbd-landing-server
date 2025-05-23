@@ -2,7 +2,7 @@ import nodemailer from 'nodemailer';
 import { db } from './firebaseAdmin.js';
 import dotenv from 'dotenv';
 dotenv.config();
-export const sendEmail = async ({ name, email, phone, projectType, budget, timeframe, message, }) => {
+export const sendEmail = async (data) => {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
@@ -10,34 +10,45 @@ export const sendEmail = async ({ name, email, phone, projectType, budget, timef
             pass: process.env.EMAIL_PASS,
         },
     });
-    // Format budget for display
-    let formattedBudget = budget || 'Not specified';
-    if (budget === '<5k')
-        formattedBudget = 'Less than $5,000';
-    if (budget === '5-10k')
-        formattedBudget = '$5,000 - $10,000';
-    if (budget === '10-25k')
-        formattedBudget = '$10,000 - $25,000';
-    if (budget === '25k+')
-        formattedBudget = '$25,000+';
-    if (budget === 'not-sure')
-        formattedBudget = 'Not sure yet';
-    // Format timeframe for display
-    let formattedTimeframe = timeframe || 'Not specified';
-    if (timeframe === 'asap')
-        formattedTimeframe = 'As soon as possible';
-    if (timeframe === '1-3months')
-        formattedTimeframe = '1-3 months';
-    if (timeframe === '3-6months')
-        formattedTimeframe = '3-6 months';
-    if (timeframe === '6months+')
-        formattedTimeframe = '6+ months';
-    if (timeframe === 'flexible')
-        formattedTimeframe = 'Flexible';
-    // Format project type for display
-    let formattedProjectType = projectType || 'Not specified';
-    // Create a plain text version as fallback
-    const textContent = `
+    let mailOptions;
+    if (data.to && data.subject && data.body) {
+        mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: data.to,
+            subject: data.subject,
+            html: `<p>${data.body}</p>`
+        };
+    }
+    else {
+        const { name, email, phone, projectType, budget, timeframe, message, } = data;
+        // Format budget for display
+        let formattedBudget = budget || 'Not specified';
+        if (budget === '<5k')
+            formattedBudget = 'Less than $5,000';
+        if (budget === '5-10k')
+            formattedBudget = '$5,000 - $10,000';
+        if (budget === '10-25k')
+            formattedBudget = '$10,000 - $25,000';
+        if (budget === '25k+')
+            formattedBudget = '$25,000+';
+        if (budget === 'not-sure')
+            formattedBudget = 'Not sure yet';
+        // Format timeframe for display
+        let formattedTimeframe = timeframe || 'Not specified';
+        if (timeframe === 'asap')
+            formattedTimeframe = 'As soon as possible';
+        if (timeframe === '1-3months')
+            formattedTimeframe = '1-3 months';
+        if (timeframe === '3-6months')
+            formattedTimeframe = '3-6 months';
+        if (timeframe === '6months+')
+            formattedTimeframe = '6+ months';
+        if (timeframe === 'flexible')
+            formattedTimeframe = 'Flexible';
+        // Format project type for display
+        let formattedProjectType = projectType || 'Not specified';
+        // Create a plain text version as fallback
+        const textContent = `
 New Contact Form Submission
 
 From: ${name}
@@ -53,8 +64,8 @@ Timeframe: ${formattedTimeframe}
 Message:
 ${message}
   `;
-    // Create an HTML version with better formatting and branding
-    const htmlContent = `
+        // Create an HTML version with better formatting and branding
+        const htmlContent = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -192,35 +203,36 @@ ${message}
 </body>
 </html>
   `;
-    const mailOptions = {
-        from: process.env.EMAIL_USER,
-        replyTo: email,
-        to: process.env.TO_EMAIL,
-        subject: `New Project Inquiry from ${name} - ${projectType || 'Not specified'}`,
-        text: textContent,
-        html: htmlContent,
-    };
-    try {
-        await transporter.sendMail(mailOptions);
-        const data = {
-            name,
-            email,
-            phone,
-            projectType,
-            budget,
-            timeframe,
-            message,
-            createdAt: new Date(),
-            status: 'new',
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            replyTo: email,
+            to: process.env.TO_EMAIL,
+            subject: `New Project Inquiry from ${name} - ${projectType || 'Not specified'}`,
+            text: textContent,
+            html: htmlContent,
         };
-        if (!phone || typeof phone !== 'string' || phone.trim() === '') {
-            console.error("Phone number is required but missing or invalid.");
-            throw new Error('Phone number is required');
+        try {
+            await transporter.sendMail(mailOptions);
+            const data = {
+                name,
+                email,
+                phone,
+                projectType,
+                budget,
+                timeframe,
+                message,
+                createdAt: new Date(),
+                status: 'new',
+            };
+            if (!phone || typeof phone !== 'string' || phone.trim() === '') {
+                console.error("Phone number is required but missing or invalid.");
+                throw new Error('Phone number is required');
+            }
+            await db.collection('messages').add(Object.fromEntries(Object.entries(data).filter(([_, value]) => value !== undefined)));
         }
-        await db.collection('messages').add(Object.fromEntries(Object.entries(data).filter(([_, value]) => value !== undefined)));
-    }
-    catch (err) {
-        console.error('Error sending email or writing to Firestore:', err);
-        throw err;
+        catch (err) {
+            console.error('Error sending email or writing to Firestore:', err);
+            throw err;
+        }
     }
 };

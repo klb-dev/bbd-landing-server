@@ -3,23 +3,7 @@ import { db } from './firebaseAdmin.js';
 import dotenv from 'dotenv';
 dotenv.config();
 
-export const sendEmail = async ({
-  name,
-  email,
-  phone,
-  projectType,
-  budget,
-  timeframe,
-  message,
-}: {
-  name: string;
-  email: string;
-  phone?: string;
-  projectType?: string;
-  budget?: string;
-  timeframe?: string;
-  message: string;
-}) => {
+export const sendEmail = async (data: any) => {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -27,6 +11,27 @@ export const sendEmail = async ({
       pass: process.env.EMAIL_PASS,
     },
   });
+
+  let mailOptions;
+
+  if(data.to && data.subject && data.body) {
+    mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: data.to,
+      subject: data.subject,
+      html: `<p>${data.body}</p>`
+    }
+  }
+    else {
+    const {
+      name,
+      email,
+      phone,
+      projectType,
+      budget,
+      timeframe,
+      message,
+    } = data;
 
   // Format budget for display
   let formattedBudget = budget || 'Not specified';
@@ -64,7 +69,6 @@ Timeframe: ${formattedTimeframe}
 Message:
 ${message}
   `;
-
   // Create an HTML version with better formatting and branding
   const htmlContent = `
 <!DOCTYPE html>
@@ -243,4 +247,4 @@ ${message}
     throw err;
   }
 }
-
+}

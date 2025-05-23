@@ -14,11 +14,15 @@ app.use(express.json());
 
 app.post('/api/contact', async (req, res) => {
   try {
-    const { name, email, phone, projectType, budget, timeframe, message } = req.body;
+    const { name, email, phone, projectType, budget, timeframe, message, to, subject, body } = req.body;
     
     // Send email
+    if(to && subject && body) {
+      await sendEmail({to, subject, html: `<p>${body}</p>`});
+      return res.status(200).send('Admin reply sent');
+    }
     await sendEmail(req.body);
-    
+
     // Store in Firestore
     await db.collection('messages').add({
       name,
@@ -32,15 +36,13 @@ app.post('/api/contact', async (req, res) => {
       createdAt: FieldValue.serverTimestamp(),
     });
     
-    res.status(200).json({ success: true });
+    res.status(200).send('Message submitted');
   } catch (err) {
-    console.error('Contact form error:', err);
-    res.status(500).json({ 
-      success: false,
-      error: 'Failed to process your message' 
-    });
+    console.error('Email send or Firestore write failed:', err);
+    res.status(500).send('Failed to process request');
   }
 });
+
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
