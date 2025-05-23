@@ -220,7 +220,7 @@ ${message}
         await db.collection('messages').add(Object.fromEntries(Object.entries(data).filter(([_, value]) => value !== undefined)));
     }
     catch (err) {
-        console.error('❌ Error sending email or writing to Firestore:', err);
+        console.error('Error sending email or writing to Firestore:', err);
         throw err;
     }
 };

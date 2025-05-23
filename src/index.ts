@@ -17,7 +17,7 @@ app.post('/api/contact', async (req, res) => {
     const { name, email, phone, projectType, budget, timeframe, message } = req.body;
     
     // Send email
-    await sendEmail({ name, email, message });
+    await sendEmail(req.body);
     
     // Store in Firestore
     await db.collection('messages').add({

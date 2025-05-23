@@ -239,7 +239,7 @@ ${message}
     );
 
   } catch (err) {
-    console.error('❌ Error sending email or writing to Firestore:', err);
+    console.error('Error sending email or writing to Firestore:', err);
     throw err;
   }
 }
