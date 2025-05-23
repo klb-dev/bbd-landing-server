@@ -15,7 +15,7 @@ app.post('/api/contact', async (req, res) => {
         if (isReply && to && subject && body) {
             console.log("🛠 Reply flow matched", { to, subject, body });
             await sendEmail({ to, subject, body });
-            return res.status(200).send("Reply sent");
+            res.status(200).json({ success: true, message: "Reply sent" });
         }
         if (!name || !email || !message) {
             console.log("🚫 Missing fields:", { name, email, message });
@@ -37,7 +37,7 @@ app.post('/api/contact', async (req, res) => {
             createdAt: FieldValue.serverTimestamp(),
         });
         console.log("✅ Message saved to Firestore");
-        res.status(200).send("Message saved and email sent");
+        res.status(200).json({ success: true, message: "Message submitted" });
     }
     catch (err) {
         console.error("🔥 Error inside contact form logic:", err);
