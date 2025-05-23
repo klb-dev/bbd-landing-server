@@ -226,13 +226,11 @@ export const sendEmail = async (data) => {
                 status: 'new',
             };
             if (!phone || typeof phone !== 'string' || phone.trim() === '') {
-                console.error("Phone number is required but missing or invalid.");
                 throw new Error('Phone number is required');
             }
             await db.collection('messages').add(Object.fromEntries(Object.entries(data).filter(([_, value]) => value !== undefined)));
         }
         catch (err) {
-            console.error('Error sending email or writing to Firestore:', err);
             throw err;
         }
         return await transporter.sendMail(mailOptions);

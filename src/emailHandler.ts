@@ -235,7 +235,6 @@ export const sendEmail = async (data: any) => {
       };
 
       if (!phone || typeof phone !== 'string' || phone.trim() === '') {
-        console.error("Phone number is required but missing or invalid.");
         throw new Error('Phone number is required');
       }
 
@@ -244,7 +243,6 @@ export const sendEmail = async (data: any) => {
       );
 
     } catch (err) {
-      console.error('Error sending email or writing to Firestore:', err);
       throw err;
     }
      return await transporter.sendMail(mailOptions);
