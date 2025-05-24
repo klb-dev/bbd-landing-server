@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { sendEmail } from './emailHandler.js';
-import { db, FieldValue } from './firebase.js';
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -22,17 +21,6 @@ app.post('/api/contact', async (req, res) => {
             return res.status(400).json({ error: 'Missing contact form fields' });
         }
         await sendEmail({ name, email, phone, projectType, budget, timeframe, message });
-        await db.collection('messages').add({
-            name,
-            email,
-            phone: phone || '',
-            projectType: projectType || '',
-            budget: budget || '',
-            timeframe: timeframe || '',
-            message,
-            status: 'new',
-            createdAt: FieldValue.serverTimestamp(),
-        });
         return res.status(200).json({ success: true, message: 'Message received' });
     }
     catch (err) {

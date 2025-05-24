@@ -71,7 +71,7 @@ export const sendEmail = async (data) => {
   <html>
   <head>
     <meta charset="utf-8">
-    <title>New Contact Form Submission</title>
+    <title>Inquiry to Contact Form Submission</title>
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -140,17 +140,13 @@ export const sendEmail = async (data) => {
         border-radius: 4px;
         margin-top: 10px;
       }
-      .blue-byrd-logo {
-        font-weight: bold;
-        font-size: 18px;
-      }
     </style>
   </head>
   <body>
     <div class="email-container">
       <div class="email-header">
-        <div class="blue-byrd-logo">Blue Byrd Development</div>
-        <h2 style="margin: 10px 0 0 0;">New Contact Form Submission</h2>
+        <img src="https://bluebyrddevelopment.com/images/BBD-Logo.webp" alt="Blue Byrd Development Logo" style="height:40px; margin-bottom: 10px;">
+        <h2 style="margin: 10px 0 0 0;">Inquiry of Project</h2>
       </div>
       
       <div class="email-body">

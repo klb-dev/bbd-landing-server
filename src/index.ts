@@ -32,18 +32,6 @@ app.post('/api/contact', async (req, res) => {
 
     await sendEmail({ name, email, phone, projectType, budget, timeframe, message });
 
-    await db.collection('messages').add({
-      name,
-      email,
-      phone: phone || '',
-      projectType: projectType || '',
-      budget: budget || '',
-      timeframe: timeframe || '',
-      message,
-      status: 'new',
-      createdAt: FieldValue.serverTimestamp(),
-    });
-
     return res.status(200).json({ success: true, message: 'Message received' });
   } catch (err) {
     if (!res.headersSent) {
